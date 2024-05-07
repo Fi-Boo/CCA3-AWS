@@ -1,17 +1,29 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
+from Controllers import DBController
 
-
-# EB looks for an 'application' callable by default.
 application = Flask(__name__)
 
-@application.route("/")
-def index():
-    return "Hello, welcome to my page!"
+@application.route("/", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        
+        if DBController.validateEmail(email) == True and DBController.validatePassword(password) == True:
+    
+            return redirect(url_for('success'))
+        else:
+            
+            error = 'Invalid email or password. Please try again.'
+
+    return render_template('login.html', error=error)
+
+@application.route('/success')
+def success():
+    return "Login successful!"
 
 
-# run the app.
 if __name__ == "__main__":
-    # Setting debug to True enables debug output. This line should be
-    # removed before deploying a production app.
-    application.debug = True
+    #application.debug = True
     application.run()
