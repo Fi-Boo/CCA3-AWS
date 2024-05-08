@@ -1,0 +1,48 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    scroll-behavior: smooth;
+    overflow-x: scroll;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.loginContainer, .mainContainer {
+    border: 1px solid grey;
+    width: 50rem;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgrey;
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.formGroup {
+    align-content: center;
+    width: 20rem;
+    text-align: center;
+}
+
+.formGroup input {
+    height: 2rem;
+    width: 19.5rem;
+    text-align: center;
+    font-size: 1rem;
+    margin: 0.5rem 0 0;
+}
+
+input[type=submit] {
+    width: 10rem;
+    margin: 0.5rem 0 0;
+}
