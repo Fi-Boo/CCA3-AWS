@@ -10,7 +10,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
         
-        if DBController.validateEmail(email) == True and DBController.validatePassword(password) == True:
+        if DBController.validateLogin(email, password) == True:
     
             return redirect(url_for('success'))
         else:
