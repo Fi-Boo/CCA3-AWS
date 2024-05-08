@@ -37,8 +37,7 @@ class DBController:
             }
         )
         
-        if 'Item' in response:
-            return response['Item']['user_name']
+        return response['Item']['user_name']
         
 
 application = Flask(__name__)
@@ -54,8 +53,6 @@ def login():
         password = request.form['password']
         
         if DBController.validateLogin(email, password) == True:
-            
-            print(application.secret_key)   
             
             session['loggedUser'] = email
         
