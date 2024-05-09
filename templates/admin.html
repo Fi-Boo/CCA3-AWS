@@ -121,17 +121,19 @@
             <tr>
               <form action="{{ url_for('adminProcess') }}" method="POST">
                 <td>
-                  {{ user.email }}<input
-                    type="hidden"
+                  <input
+                    class="usersTableInput"
+                    type="email"
                     name="editUserEmail"
-                    value="{{ user.email }}"
+                    value="{{ user.email }}" readonly
                   />
                 </td>
                 <td>
-                  {{ user.name }}<input
-                    type="hidden"
+                  <input
+                    class="usersTableInputName"
+                    type="text"
                     name="editUserName"
-                    value="{{ user.name }}"
+                    value="{{ user.name }}" 
                   />
                 </td>
                 <td>
@@ -150,10 +152,10 @@
                   </select>
                 </td>
                 <td>
-                  <button type="submit" name="action" value="edit">Edit</button>
+                  <button class="usersTableBtnEdit" type="submit" name="action" value="edit">Edit</button>
                 </td>
                 <td>
-                  <button type="submit" name="action" value="delete">
+                  <button class="usersTableBtnDel"  type="submit" name="action" value="delete">
                     Delete
                   </button>
                 </td>
