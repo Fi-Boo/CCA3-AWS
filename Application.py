@@ -11,7 +11,7 @@ dynamodb = boto3.resource('dynamodb', region_name='us-east-1', aws_access_key_id
     
 def validateLogin(email, password):
     
-    table_name = "login"
+    table_name = "cca3-login"
     table = dynamodb.Table(table_name)
     
     response = table.get_item(
@@ -27,7 +27,7 @@ def validateLogin(email, password):
 
 def getUsername(email):
     
-    table_name = "login"
+    table_name = "cca3-login"
     table = dynamodb.Table(table_name)
     
     response = table.get_item(
@@ -37,6 +37,19 @@ def getUsername(email):
     )
     
     return response['Item']['user_name']
+
+def getStaffLevel(email):
+    
+    table_name = "cca3-login"
+    table = dynamodb.Table(table_name)
+    
+    response = table.get_item(
+        Key={
+            'email': email
+        }
+    )
+    
+    return response['Item']['staff_level']
         
 
 application = Flask(__name__)
@@ -46,6 +59,10 @@ application.secret_key = "".join(random.choices(string.ascii_uppercase + string.
 
 @application.route("/", methods=["GET", "POST"])
 def login():
+    
+    if 'loggedUser' in session:
+        session.clear()
+    
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -54,6 +71,7 @@ def login():
         if validateLogin(email, password) == True:
             
             session['loggedUser'] = email
+            session['staffLevel'] = getStaffLevel(email)
         
             return redirect(url_for('main'))
         else:
@@ -62,6 +80,8 @@ def login():
 
     return render_template('login.html', error=error)
 
+
+
 @application.route('/main', methods=["GET", "POST"])
 def main():
     
@@ -69,13 +89,20 @@ def main():
         
         loggedUsername = getUsername(session['loggedUser'])
         
-        return render_template('main.html', loggedUser = loggedUsername)
+        return render_template('main.html', loggedUser = loggedUsername, staffLevel = session['staffLevel'])
     
     else:
         return redirect(url_for('login'))
     
 
+@application.route('/admin', methods=["GET", "POST"])
+def admin():
+    return render_template('admin.html', staffLevel = session['staffLevel'])
+
+
 
 if __name__ == "__main__":
     #application.debug = True
     application.run()
+    
+    

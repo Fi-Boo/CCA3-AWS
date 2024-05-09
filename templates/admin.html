@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>s2008156 Cloud Computing A3 2024 SP1</title>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- <link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}" 
+    /> -->
+    <link type="text/css" rel="stylesheet" href="../static/styles.css" />
+  </head>
+  <body>
+    <div id="adminContainer">
+      <nav>
+        <div id="banner">
+          <img src="" />
+        </div>
+        <div class="navbar">
+          {% if staffLevel == "1" %}
+          <div class="dropdown">
+            <button class="dropbtn">Admin ▼</button>
+            <div class="dropdown-content">
+              <a href="{{ url_for('admin') }}">Staff Management</a>
+              <a href="#stock">Stock</a>
+              <a href="#records">Records</a>
+            </div>
+          </div>
+          {% endif %}
+          <a href="{{ url_for('main') }}">Return to Sales Screen</a>
+        </div>
+      </nav>
+      <div class="headerBanner">
+        <h1>ADMIN CONSOLE</h1>
+      </div>
+    </div>
+  </body>
+</html>

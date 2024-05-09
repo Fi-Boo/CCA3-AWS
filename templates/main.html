@@ -1,16 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> s2008156 Cloud Computing A3 2024 SP1 </title>
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
-        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="mainContainer">
-        <h1> Welcome {{ loggedUser }} </h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>s2008156 Cloud Computing A3 2024 SP1</title>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- <link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}" 
+    /> -->
+    <link type="text/css" rel="stylesheet" href="../static/styles.css" />
+  </head>
+  <body>
+    <div id="mainContainer">
+      <nav>
+        <div id="banner">
+          <img src="" />
+        </div>
+        <div class="navbar">
+          {% if staffLevel == "1" %}
+          <div class="dropdown">
+            <button class="dropbtn">Admin ▼</button>
+            <div class="dropdown-content">
+              <a href="{{ url_for('admin') }}">Staff Management</a>
+              <a href="#stock">Stock</a>
+              <a href="#records">Records</a>
+            </div>
+          </div>
+          {% endif %}
+          <a href="{{ url_for('login') }}">Logout</a>
+        </div>
+      </nav>
+      <div class="staffBanner">
+        <h1>Salesperson: {{ loggedUser }}</h1>
+      </div>
+      <div id="mainContent">
+        <div id="searchByPLU">
+          <form action="/addByCode" method="post">
+            <label for="PLU">PLU/Barcode:</label>
+            <input type="text" id="PLUsearch" name="PLUsearch" />
+            <button type="submit">Add Item</button>
+          </form>
+        </div>
+        <div id="searchByName">
+          <form action="/searchByName" method="post">
+            <label for="PLU">Name Search:</label>
+            <input type="text" id="nameSearch" name="nameSearch" />
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <div id="transactionNum">
+          <h3>{{ transaction }}</h3>
+        </div>
+        <div id="errorBanner">
+          {% if error %}
+          <h3>{{ error }}</h3>
+          {% endif %}
+        </div>
+        <div id="cartContent">
+          <table>
+            <tr>
+              <th>L:</th>
+              <th>Code</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Line Total</th>
+              <th></th>
+            </tr>
+            {% for item in cart %}
+            <tr>
+              <td>{{ item.code }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.price }}</td>
+              <td>
+                <input type="number" id="lineQty" name="lineQty" value="1" />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  id="lineTotal"
+                  name="lineTotal"
+                  value=""
+                  readonly
+                />
+              </td>
+              <td><input type="hidden" value="{{ item.code }}" /></td>
+            </tr>
 
+            {% endfor %}
+          </table>
+        </div>
+        <div id="totalsBanner"></div>
+      </div>
     </div>
-</body>
+  </body>
 </html>
