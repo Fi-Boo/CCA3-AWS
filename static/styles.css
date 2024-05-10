@@ -241,7 +241,8 @@ input, button, select {
 table th {
   position: sticky;
   top: 0;
-  background: grey;
+  background: #333;
+  color: white;
 }
 
 #scroll {
