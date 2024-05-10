@@ -2,13 +2,12 @@ import random
 import string
 import boto3
 
-from flask import Flask, request, render_template, redirect, session, url_for
+from flask import Flask, request, render_template, redirect, url_for, session
 from boto3.dynamodb.conditions import Key
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1', aws_access_key_id='AKIAW3MEABS7NBPKBZEW', aws_secret_access_key='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')
 
-    
 def validateLogin(email, password):
     
     table_name = "cca3-login"
@@ -150,15 +149,13 @@ def getLoggedUser(email):
     }
     
     return user
-    
-    
-    
-    
+
 
 application = Flask(__name__)
 
 #https://www.javatpoint.com/python-program-to-generate-a-random-string#:~:text=ADVERTISEMENT-,The%20random.,choices()%20function.
 application.secret_key = "".join(random.choices(string.ascii_uppercase + string.digits, k = 10))
+
 
 @application.route("/", methods=["GET", "POST"])
 def login():
@@ -184,7 +181,6 @@ def login():
     return render_template('login.html', error=error)
 
 
-
 @application.route('/main', methods=["GET", "POST"])
 def main():
     
@@ -196,7 +192,6 @@ def main():
     
     else:
         return redirect(url_for('login'))
-    
 
 @application.route('/admin', methods=["GET", "POST"])
 def admin():
@@ -213,7 +208,7 @@ def admin():
     
     else:
         return redirect(url_for('login'))
-
+    
 @application.route('/addUser', methods=["GET", "POST"])
 def addUser():
     
@@ -249,6 +244,8 @@ def addUser():
 @application.route('/admin_process', methods=["GET", "POST"])
 def adminProcess():
     
+    loggedUser = getLoggedUser(session['loggedUser'])
+    
     if 'loggedUser' in session:
         
         if request.method == 'POST':
@@ -256,39 +253,47 @@ def adminProcess():
             action = request.form['action']
             email = request.form['editUserEmail']
             name = request.form['editUserName']
-            staffLvl = request.form['editUserLvl']
+            
             m = None
 
             
-            if getLoggedUser(session['loggedUser'])['staff_level'] == "2":
+            if loggedUser['staff_level'] == "2":
                 password = request.form['editUserPassword']
                 passwordConfirm = request.form['editUserPasswordConfirm']
+                staffLvl = "2"
                 
-                if password != passwordConfirm:
+                if password != passwordConfirm and password != "":
                     m = "Password Mismatch"
                 
                 else:
+                    
+                    if password == "":
+                        password = loggedUser['password']
+                    
                     addNewUser(email, name, password, staffLvl)
                     m = "User details changed"
                 
                 return redirect(url_for('admin', m = m))
             
-            if action == 'edit':
+            else:
                 
-                editUser(email, name, staffLvl)
-                m = "Changes to staff successful"
+                staffLvl = request.form['editUserLvl']
                 
-            elif action == 'delete':
+                if action == 'edit':
                 
-                deleteUser(email)
-                m = "Staff removed successful"
+                    editUser(email, name, staffLvl)
+                    m = "Changes to staff successful"
+                
+                elif action == 'delete':
+                
+                    deleteUser(email)
+                    m = "Staff removed successful"
 
             return redirect(url_for('admin', m = m))
     else:
         return redirect(url_for('login'))
 
+
 if __name__ == "__main__":
     #application.debug = True
     application.run()
-    
-    

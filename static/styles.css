@@ -16,7 +16,7 @@ body {
   height: 100%;
   font-family: "Rajdhani", sans-serif;
   background-image: url("https://s2008156-cca3.s3.amazonaws.com/background.png");
-  background-size: cover;
+  background-size: cover; 
 }
 
 body img {

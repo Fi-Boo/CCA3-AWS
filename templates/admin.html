@@ -15,7 +15,7 @@
     <div id="adminContainer">
       <nav>
         <div id="banner">
-          <img src="https://s2008156-cca3.s3.amazonaws.com/navBanner.png" />
+           <img src="https://s2008156-cca3.s3.amazonaws.com/navBanner.png" /> 
         </div>
         <div class="navbar">
           <div class="dropdown">
@@ -66,20 +66,20 @@
               <input
                 type="password"
                 name="editUserPassword"
-                value="{{ loggedUser.password }}"
-                required
+                value=""
+                placeholder="Password"
               /><br />
             </div>
             <div class="formGroup">
               <input
                 type="password"
                 name="editUserPasswordConfirm"
-                value="{{ loggedUser.password }}"
-                required
+                value=""
+                placeholder="Confirm Password"
               /><br />
             </div>
             <div class="formGroup">
-              <select
+              <!-- <select
                 class="formGroup"
                 id="dropdown"
                 name="editUserLvl"
@@ -91,9 +91,9 @@
                 <option value="2">Staff</option>
                 {% else %}
                 <option value="2">Staff</option>
-                <option value="1">Admin</option>
+                <option value="2"></option>
                 {% endif %}
-              </select>
+              </select> -->
             </div>
             <div class="formGroup">
               <Button type="submit" class="btnPrimary" name="action" value="Edit"> Confirm Edit </Button>
