@@ -7,6 +7,8 @@ from boto3.dynamodb.conditions import Key
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1', aws_access_key_id='AKIAW3MEABS7NBPKBZEW', aws_secret_access_key='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')
+cloudFrontDomain ='https://d1yd7dukro94c1.cloudfront.net/'
+navBanner = cloudFrontDomain + "navBanner.png"
 
 def validateLogin(email, password):
     
@@ -188,7 +190,7 @@ def main():
         
         loggedUsername = getUsername(session['loggedUser'])
         
-        return render_template('main.html', loggedUser = loggedUsername, staffLevel = session['staffLevel'])
+        return render_template('main.html', navBanner = navBanner, loggedUser = loggedUsername, staffLevel = session['staffLevel'])
     
     else:
         return redirect(url_for('login'))
@@ -204,7 +206,7 @@ def admin():
         
         loggedUser = getLoggedUser(session['loggedUser'])
         
-        return render_template('admin.html', staffLevel = session['staffLevel'], loggedUser = loggedUser, users = users, error = error)
+        return render_template('admin.html', navBanner = navBanner, staffLevel = session['staffLevel'], loggedUser = loggedUser, users = users, error = error)
     
     else:
         return redirect(url_for('login'))
