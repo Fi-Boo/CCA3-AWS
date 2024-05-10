@@ -118,8 +118,7 @@ def editUser(email, name, staffLvl):
         'staff_level': staffLvl
     }
     
-    table.put_item(Item=user)
-    
+    table.put_item(Item=user)   
     
 def deleteUser(email):
 
@@ -128,6 +127,32 @@ def deleteUser(email):
     key = {'email': email}
     
     response = table.delete_item(Key=key)
+
+
+def getLoggedUser(email):
+    
+    table_name = "cca3-login"
+    table = dynamodb.Table(table_name)
+    
+    response = table.get_item(
+        Key={
+            'email': email
+        }
+    )
+    
+    item = response['Item']
+    user = {
+        'email': item['email'],
+        'user_name': item['user_name'],
+        'password': item['password'],
+        'staff_level': item['staff_level'],
+        'password': item['password']
+    }
+    
+    return user
+    
+    
+    
     
 
 application = Flask(__name__)
@@ -182,7 +207,9 @@ def admin():
         
         users = getUsersList()
         
-        return render_template('admin.html', staffLevel = session['staffLevel'], users = users, error = error)
+        loggedUser = getLoggedUser(session['loggedUser'])
+        
+        return render_template('admin.html', staffLevel = session['staffLevel'], loggedUser = loggedUser, users = users, error = error)
     
     else:
         return redirect(url_for('login'))
@@ -231,6 +258,20 @@ def adminProcess():
             name = request.form['editUserName']
             staffLvl = request.form['editUserLvl']
             m = None
+
+            
+            if getLoggedUser(session['loggedUser'])['staff_level'] == "2":
+                password = request.form['editUserPassword']
+                passwordConfirm = request.form['editUserPasswordConfirm']
+                
+                if password != passwordConfirm:
+                    m = "Password Mismatch"
+                
+                else:
+                    addNewUser(email, name, password, staffLvl)
+                    m = "User details changed"
+                
+                return redirect(url_for('admin', m = m))
             
             if action == 'edit':
                 

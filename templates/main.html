@@ -5,30 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>s2008156 Cloud Computing A3 2024 SP1</title>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <!-- <link
+    <link
       type="text/css"
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}" 
-    /> -->
-    <link type="text/css" rel="stylesheet" href="../static/styles.css" />
+    />
   </head>
   <body>
     <div id="mainContainer">
       <nav>
         <div id="banner">
-          <img src="" />
+          <img src="https://s2008156-cca3.s3.amazonaws.com/navBanner.png" />
         </div>
         <div class="navbar">
-          {% if staffLevel == "1" %}
           <div class="dropdown">
             <button class="dropbtn">Admin ▼</button>
             <div class="dropdown-content">
               <a href="{{ url_for('admin') }}">Staff Management</a>
+              {% if staffLevel == "1" %}
               <a href="#stock">Stock</a>
               <a href="#records">Records</a>
+              {% endif %}
             </div>
           </div>
-          {% endif %}
+          
           <a href="{{ url_for('login') }}">Logout</a>
         </div>
       </nav>
