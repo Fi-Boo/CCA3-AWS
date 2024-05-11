@@ -41,6 +41,7 @@
           class="stockForm"
           action="{{ url_for('addStockItem') }}"
           method="POST"
+          enctype="multipart/form-data"
         >
           <div class="formGroup">
             <h2>ADD STOCK</h2>
@@ -161,8 +162,7 @@
                 type="file"
                 id="stockImgSelect"
                 accept="image/png, image/jpeg"
-                name="stockSKYImg"
-                value=""
+                name="stockSKUImage"
               />
             </div>
 

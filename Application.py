@@ -6,7 +6,12 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from boto3.dynamodb.conditions import Key
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1', aws_access_key_id='AKIAW3MEABS7NBPKBZEW', aws_secret_access_key='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')
+awsKey = 'AKIAW3MEABS7NBPKBZEW'
+awsSecretKey = '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'
+region = 'us-east-1'
+s3Bucket = 's2008156-cca3'
+dynamodb = boto3.resource('dynamodb', region_name=region, aws_access_key_id=awsKey, aws_secret_access_key=awsSecretKey)
+s3 = boto3.client('s3', aws_access_key_id=awsKey, aws_secret_access_key=awsSecretKey, region_name=region)
 cloudFrontDomain ='https://d1yd7dukro94c1.cloudfront.net/'
 navBanner = cloudFrontDomain + "navBanner.png"
 
@@ -151,6 +156,12 @@ def getLoggedUser(email):
     }
     
     return user
+
+def upLoadImg(image, imageName):
+    
+    print(image)
+
+
 
 
 application = Flask(__name__)
@@ -299,16 +310,40 @@ def adminProcess():
 @application.route('/stock', methods=["GET", "POST"])
 def stock():
     
-    message = request.args.get('m')
-    
-    return render_template("stock.html", navBanner = navBanner, message = message)
+    if 'loggedUser' in session:
+         
+        message = request.args.get('m')
+        
+        return render_template("stock.html", navBanner = navBanner, message = message)
+
+    return redirect(url_for('login'))
+
 
 
 @application.route('/addStock', methods=['GET', 'POST'])
 def addStockItem():
     
-    m = "success"
-    return redirect(url_for('stock', m = m))
+    if 'loggedUser' in session:
+        
+        if request.method == 'POST':
+            
+            m = ""
+            
+            try:
+                
+                file = request.files["stockSKUImage"]
+                
+                s3.upload_fileobj(file, s3Bucket, file.filename)
+                
+                m="Product added successfully"
+                
+                return redirect(url_for('stock', m = m))
+            
+            except Exception as e:
+                print("Error:", e)
+                return "Error occurred while processing file"
+    
+    return redirect(url_for('login'))
 
 
 
