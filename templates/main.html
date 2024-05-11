@@ -23,7 +23,7 @@
             <div class="dropdown-content">
               <a href="{{ url_for('admin') }}">Staff Management</a>
               {% if staffLevel == "1" %}
-              <a href="#stock">Stock</a>
+              <a href="{{ url_for('stock') }}">Stock</a>
               <a href="#records">Records</a>
               {% endif %}
             </div>

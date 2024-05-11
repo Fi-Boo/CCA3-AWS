@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>s2008156 Cloud Computing A3 2024 SP1</title>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!--<link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />-->
+    <link type="text/css" rel="stylesheet" href="../static/styles.css" />
+  </head>
+  <body>
+    <div id="adminContainer">
+      <nav>
+        <div id="banner">
+          <img src="{{ navBanner }}" />
+        </div>
+        <div class="navbar">
+          <div class="dropdown">
+            <button class="dropbtn">Admin ▼</button>
+            <div class="dropdown-content">
+              <a href="{{ url_for('admin') }}">Staff Management</a>
+              {% if staffLevel == "1" %}
+              <a href="{{ url_for('stock') }}">Stock</a>
+              <a href="#records">Records</a>
+              {% endif %}
+            </div>
+          </div>
+
+          <a href="{{ url_for('main') }}">Return to Sales Screen</a>
+        </div>
+      </nav>
+      <div class="headerBanner">
+        <h1>STOCK CONSOLE</h1>
+      </div>
+      <div class="addEditContainer">
+        <form
+          class="stockForm"
+          action="{{ url_for('addStockItem') }}"
+          method="POST"
+        >
+          <div class="formGroup">
+            <h2>ADD STOCK</h2>
+          </div>
+          <div class="stockTemplate">
+            <div class="stockSKUImg"></div>
+            <div class="stockSKUCategory">
+              <div class="form-check">Category</div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio1"
+                  name="stockSKUClass"
+                  value="Liquor"
+                  checked
+                />
+                <label class="form-check-label" for="radio1">Liquor</label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio2"
+                  name="stockSKUClass"
+                  value="Snacks"
+                />
+                <label class="form-check-label" for="radio2">Snacks</label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio3"
+                  name="stockSKUClass"
+                  value="Tobacco"
+                />
+                <label class="form-check-label" for="radio2">Tobacco</label>
+              </div>
+            </div>
+            <div class="stockDesc">
+              <input
+                type="text"
+                class="stock"
+                name="stockDesc"
+                placeholder="SKU Description"
+                required
+              />
+            </div>
+            <div class="stockPriceSingle">
+              <label for="stockPriceSingle" class="stockLabel"
+                >Single ($):</label
+              >
+              <input
+                type="float"
+                id="stockPrice"
+                name="stockPriceSingle"
+                placeholder="Price"
+                required
+              />
+            </div>
+            <div class="stockPLUSingle">
+              <input
+                type="text"
+                class="stockPLU"
+                name="stockPLUSingle"
+                placeholder="Single Barcode"
+                required
+              />
+            </div>
+            <div class="stockPriceMulti">
+              <input
+                type="number"
+                id="stockMultiValue"
+                name="stockMultiValue"
+                value=""
+              />
+              <label for="stockPriceMulti" class="stockLabel">Pack ($):</label>
+              <input
+                type="float"
+                id="stockPrice"
+                name="stockPriceMulti"
+                placeholder="Price"
+                value=""
+              />
+            </div>
+            <div class="stockPLUMulti">
+              <input
+                type="text"
+                class="stockPLU"
+                name="stockPLUMulti"
+                placeholder="Multipack Barcode"
+                value=""
+              />
+            </div>
+
+            <div class="stockPriceCase">
+              <label for="stockPriceCase" class="stockLabel">Case ($):</label>
+              <input
+                type="float"
+                id="stockPrice"
+                name="stockPriceCase"
+                placeholder="Price"
+                required
+              />
+            </div>
+            <div class="stockPLUCase">
+              <input
+                type="text"
+                class="stockPLU"
+                name="stockPLUCase"
+                placeholder="Case Barcode"
+                required
+              />
+            </div>
+            <div class="stockSKUImgAdd">
+              <input
+                type="file"
+                id="stockImgSelect"
+                accept="image/png, image/jpeg"
+                name="stockSKYImg"
+                value=""
+              />
+            </div>
+
+            <div class="stockAddBtn">
+              <button type="submit">ADD PRODUCT</button>
+            </div>
+          </div>
+        </form>
+        <div class="formGroup">
+          {% if message %}
+          <p style="color: red">{{ message }} </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

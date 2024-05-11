@@ -296,6 +296,23 @@ def adminProcess():
         return redirect(url_for('login'))
 
 
+@application.route('/stock', methods=["GET", "POST"])
+def stock():
+    
+    message = request.args.get('m')
+    
+    return render_template("stock.html", navBanner = navBanner, message = message)
+
+
+@application.route('/addStock', methods=['GET', 'POST'])
+def addStockItem():
+    
+    m = "success"
+    return redirect(url_for('stock', m = m))
+
+
+
+
 if __name__ == "__main__":
     #application.debug = True
     application.run()
