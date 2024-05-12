@@ -1,9 +1,11 @@
+from decimal import Decimal
 import random
 import string
 import boto3
 
 from flask import Flask, request, render_template, redirect, url_for, session
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
+from retailPOS import User, Product
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
 awsKey = 'AKIAW3MEABS7NBPKBZEW'
@@ -14,68 +16,47 @@ dynamodb = boto3.resource('dynamodb', region_name=region, aws_access_key_id=awsK
 s3 = boto3.client('s3', aws_access_key_id=awsKey, aws_secret_access_key=awsSecretKey, region_name=region)
 cloudFrontDomain ='https://d1yd7dukro94c1.cloudfront.net/'
 navBanner = cloudFrontDomain + "navBanner.png"
+products = []
+loginTable = dynamodb.Table("cca3-login")
+productsTable = dynamodb.Table("cca3-products")
 
-def validateLogin(email, password):
+def queryBy(email):
     
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
+    response = loginTable.get_item(
         Key={
             'email': email
         }
-    )
+    ) 
+    return response
+
+
+def validateLogin(email, password):
+    
+    response = queryBy(email)
     
     if 'Item' in response:
         if response['Item']['password'] == password:
             return True  
     return False 
 
+
 def getUsername(email):
     
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
-        Key={
-            'email': email
-        }
-    )
-    
-    return response['Item']['user_name']
+    return queryBy(email)['Item']['user_name']
+
 
 def getStaffLevel(email):
-    
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
-        Key={
-            'email': email
-        }
-    )
-    
-    return response['Item']['staff_level']
+  
+    return queryBy(email)['Item']['staff_level']
+
 
 def checkExists(email):
-    
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
-        Key={
-            'email': email
-        }
-    )
-    
-    if 'Item' in response:
+
+    if 'Item' in queryBy(email):
         return True
     return False
         
 def addNewUser(email, username, password, staffLevel):
-    
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
     
     item = {
         'email': email,
@@ -84,14 +65,12 @@ def addNewUser(email, username, password, staffLevel):
         'staff_level': staffLevel
     }
     
-    table.put_item(Item=item)
+    loginTable.put_item(Item=item)
     
 
 def getUsersList():
     
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    response = table.scan()
+    response = loginTable.scan()
     users = []
     
     for item in response['Items']:
@@ -105,16 +84,10 @@ def getUsersList():
     
     return users
 
+
 def editUser(email, name, staffLvl):
     
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
-        Key={
-            'email': email
-        }
-    )
+    response = queryBy(email)
     
     item = response['Item']
     user = {
@@ -124,27 +97,19 @@ def editUser(email, name, staffLvl):
         'staff_level': staffLvl
     }
     
-    table.put_item(Item=user)   
+    loginTable.put_item(Item=user)   
+
     
 def deleteUser(email):
 
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
     key = {'email': email}
     
-    response = table.delete_item(Key=key)
+    response = loginTable.delete_item(Key=key)
 
 
 def getLoggedUser(email):
-    
-    table_name = "cca3-login"
-    table = dynamodb.Table(table_name)
-    
-    response = table.get_item(
-        Key={
-            'email': email
-        }
-    )
+
+    response = queryBy(email)
     
     item = response['Item']
     user = {
@@ -157,13 +122,97 @@ def getLoggedUser(email):
     
     return user
 
-def upLoadImg(image, imageName):
+def generateSKU(stockSKUClass):
     
-    print(image)
+    response = productsTable.scan(FilterExpression=Attr('SKU').begins_with(stockSKUClass))
+    
+    count = response['Count']+1
+    
+    return stockSKUClass + '{:03d}'.format(count)
+
+def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockMultiValue, stockPriceMulti, stockPLUCase, stockPriceCase, SKU):
+    
+    item = {
+        'PLU': stockPLUSingle,
+        'description': stockDesc,
+        'price': stockPriceSingle,
+        'SKU': SKU,
+    }
+    addEditProduct(item)
+    
+    if stockPLUMulti != "":
+        item = {
+            'PLU': stockPLUMulti,
+            'description': stockDesc + " (" + stockMultiValue + "PK)",
+            'price': stockPriceMulti,
+            'SKU': SKU,
+        }
+        addEditProduct(item)
+        
+    item = {
+        'PLU': stockPLUCase,
+        'description': stockDesc + " (CASE)",
+        'price': stockPriceCase,
+        'SKU': SKU,
+    }
+    addEditProduct(item)
+
+    
+def addEditProduct(item):
+    response = productsTable.put_item(Item=item)
+
+def getProducts():
+    response = productsTable.scan()
+    products = []
+    for item in response["Items"]:  
+        product = {
+            'PLU': item['PLU'],
+            'SKU': item['SKU'],
+            'description': item['description'],
+            'price': item['price']
+        }  
+        products.append(product)
+    return products
+    
+def searchByCode(code):
+    response = productsTable.get_item(
+        Key={
+            'PLU': code
+        }
+    ) 
+    products = []
+    item = response['Item']
+    product = {
+        'PLU': item['PLU'],
+        'description': item['description'],
+        'price': item['price'],
+        'SKU': item['SKU'],
+    }
+    products.append(product)
+    return products
 
 
-
-
+def searchByDesc(description):
+    
+    if description != "":
+        response = productsTable.scan(
+            FilterExpression='contains(description, :search)',
+            ExpressionAttributeValues={':search': description}
+        )
+    else:
+        response = productsTable.scan()
+        
+    products = []
+    for item in response['Items']:
+        product = {
+            'PLU': item['PLU'],
+            'description': item['description'],
+            'price': item['price'],
+            'SKU': item['SKU'],
+        }
+        products.append(product)
+    return products
+        
 application = Flask(__name__)
 
 #https://www.javatpoint.com/python-program-to-generate-a-random-string#:~:text=ADVERTISEMENT-,The%20random.,choices()%20function.
@@ -198,6 +247,8 @@ def login():
 def main():
     
     if 'loggedUser' in session:
+        
+        products = getProducts()
         
         loggedUsername = getUsername(session['loggedUser'])
         
@@ -311,8 +362,11 @@ def adminProcess():
 def stock():
     
     if 'loggedUser' in session:
-         
-        message = request.args.get('m')
+        
+        message = None
+        
+        if 'm' in request.args: 
+            message = request.args.get('m')
         
         return render_template("stock.html", navBanner = navBanner, message = message)
 
@@ -327,25 +381,69 @@ def addStockItem():
         
         if request.method == 'POST':
             
-            m = ""
+            m= None
             
-            try:
-                
+            stockDesc = request.form['stockDesc']
+            stockPLUSingle = request.form['stockPLUSingle']
+            stockPriceSingle = request.form['stockPriceSingle']
+            stockPLUMulti = request.form['stockPLUMulti']
+            stockMultiValue = request.form['stockMultiValue']
+            stockPriceMulti = request.form['stockPriceMulti']
+            stockPLUCase = request.form['stockPLUCase']
+            stockPriceCase = request.form['stockPriceCase']
+            stockSKUClass = request.form['stockSKUClass']
+
+            count = sum(bool(value) for value in [stockPLUMulti, stockMultiValue, stockPriceMulti])
+            if count == 1 or count == 2:
+                m = "All multipack values must be empty or populated."
+                return redirect(url_for('stock', m = m))
+             
+            SKU = generateSKU(stockSKUClass)
+            addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockMultiValue, stockPriceMulti, stockPLUCase, stockPriceCase, SKU)  
+            
+            try:       
                 file = request.files["stockSKUImage"]
                 
-                s3.upload_fileobj(file, s3Bucket, file.filename)
+                if file.filename != "":
+                    
+                    fileType = file.filename.rsplit('.', 1)[-1]
+                    filename = SKU + "." + fileType
+                    s3.upload_fileobj(file, s3Bucket, filename)
                 
                 m="Product added successfully"
-                
                 return redirect(url_for('stock', m = m))
             
             except Exception as e:
                 print("Error:", e)
-                return "Error occurred while processing file"
     
     return redirect(url_for('login'))
 
+@application.route('/search', methods=['GET', 'POST'])
+def searchProduct():
+    
+    if 'loggedUser' in session:
+        
+        if request.method == 'POST':
+            m=None
+            products = []
+            searchSelection = request.form['searchPLUSKU']
+            description = request.form['searchDesc']
+            code = request.form['searchCode']
+            searchType = request.form['searchBtn']
+            
+            if searchSelection == "SKU":
+                m = "SKU search coming soon"
+                return redirect(url_for('stock', m=m))
 
+            if searchType == 'searchCode':
+                products = searchByCode(code)
+
+            else:
+                products = searchByDesc(description)
+            
+            return render_template("stock.html", navBanner = navBanner, products = products )
+    
+    return redirect(url_for('login'))
 
 
 if __name__ == "__main__":

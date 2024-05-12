@@ -174,7 +174,7 @@ h1 {
 
 #usersTable {
   width: 80%;
-  margin: 0.5rem auto;
+  margin: auto;
 }
 
 tr,
@@ -377,15 +377,107 @@ table th {
   margin: 0;
 }
 
-input[type=radio] {
+input[type="radio"] {
   width: 1rem;
   margin-right: 1rem;
 }
 
 input {
-  border: 0
+  border: 0;
 }
 
 #stockImgSelect {
   font-size: 0.6rem;
+}
+
+.searchContainer {
+  width: 60%;
+  height: 10rem;
+  padding: 1rem;
+  margin: 0 auto;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.searchContainer {
+  display: grid;
+  grid-template-areas: 
+    'radio desc desc btn1'
+    'radio plu plu btn2';
+  row-gap: 0.25rem;
+  column-gap: 0.75rem;
+  height: 5rem;
+}
+
+.searchRadio {
+  grid-area: radio;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.searchRadio div {
+  height: 2rem;
+}
+
+.searchDesc {
+  grid-area: desc;
+  overflow: hidden;
+}
+
+.searchCode {
+  grid-area: plu;
+  overflow: hidden;
+}
+
+.searchBtn1 {
+  grid-area: btn1;
+}
+
+.searchBtn2 {
+  grid-area: btn2;
+}
+
+.searchBtn1 button, .searchBtn2 button, .searchCode input, .searchDesc input{
+  width: 100%;
+  height: 2rem;
+  text-align: center;
+}
+
+.searchTable {
+  width: 48rem;
+  margin: 0 auto;
+}
+
+.resulttd input {
+  width: 100%;
+  height: 2rem;
+  text-align: center;
+}
+
+.resulttd {
+  overflow: hidden;
+}
+
+#resultdesc {
+  width: 20rem;
+  text-align: left;
+}
+
+#resultprice {
+  width: 5rem;
+}
+
+.searchContainer2 {
+
+  border-radius: 5px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 20rem;
+  width: 62%;
+  margin: 0 auto;
+  padding: 0;
+
 }

@@ -56,8 +56,8 @@
                   class="form-check-input"
                   id="radio1"
                   name="stockSKUClass"
-                  value="Liquor"
-                  checked
+                  value="L"
+                  required
                 />
                 <label class="form-check-label" for="radio1">Liquor</label>
               </div>
@@ -67,7 +67,7 @@
                   class="form-check-input"
                   id="radio2"
                   name="stockSKUClass"
-                  value="Snacks"
+                  value="S"
                 />
                 <label class="form-check-label" for="radio2">Snacks</label>
               </div>
@@ -77,7 +77,7 @@
                   class="form-check-input"
                   id="radio3"
                   name="stockSKUClass"
-                  value="Tobacco"
+                  value="T"
                 />
                 <label class="form-check-label" for="radio2">Tobacco</label>
               </div>
@@ -96,10 +96,11 @@
                 >Single ($):</label
               >
               <input
-                type="float"
+                type="number"
                 id="stockPrice"
                 name="stockPriceSingle"
                 placeholder="Price"
+                step="0.01"
                 required
               />
             </div>
@@ -117,14 +118,16 @@
                 type="number"
                 id="stockMultiValue"
                 name="stockMultiValue"
+                step="1"
                 value=""
               />
               <label for="stockPriceMulti" class="stockLabel">Pack ($):</label>
               <input
-                type="float"
+                type="number"
                 id="stockPrice"
                 name="stockPriceMulti"
                 placeholder="Price"
+                step="0.1"
                 value=""
               />
             </div>
@@ -141,10 +144,11 @@
             <div class="stockPriceCase">
               <label for="stockPriceCase" class="stockLabel">Case ($):</label>
               <input
-                type="float"
+                type="number"
                 id="stockPrice"
                 name="stockPriceCase"
                 placeholder="Price"
+                step="0.1"
                 required
               />
             </div>
@@ -173,8 +177,115 @@
         </form>
         <div class="formGroup">
           {% if message %}
-          <p style="color: red">{{ message }} </p>
+          <p style="color: red">{{ message }}</p>
           {% endif %}
+        </div>
+        <div class="formGroup">
+          <h2>SEARCH STOCK</h2>
+        </div>
+        <form
+          class="searchProduct"
+          action="{{ url_for('searchProduct')}} "
+          method="POST"
+        >
+          <div class="searchContainer">
+            <div class="searchRadio">
+              <div>
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio1"
+                  name="searchPLUSKU"
+                  value="PLU"
+                  required
+                />
+                <label class="form-check-label" for="radio1">PLU</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio1"
+                  name="searchPLUSKU"
+                  value="SKU"
+                />
+                <label class="form-check-label" for="radio2">SKU</label>
+              </div>
+            </div>
+            <div class="searchDesc">
+              <input
+                type="text"
+                name="searchDesc"
+                placeholder="Part of Product Name"
+              />
+            </div>
+            <div class="searchCode">
+              <input
+                type="text"
+                name="searchCode"
+                placeholder="Product barcode"
+              />
+            </div>
+            <div class="searchBtn1">
+              <button type="submit" name="searchBtn" value="searchDesc">
+                Search By Name
+              </button>
+            </div>
+            <div class="searchBtn2">
+              <button type="submit" name="searchBtn" value="searchCode">
+                Search By Barcode
+              </button>
+            </div>
+          </div>
+        </form>
+        <div class="formGroup">
+          <h2>SEARCH RESULTS</h2>
+        </div>
+        <div class="searchContainer2">
+          {% if products %}
+          <table class="searchTable">
+            <tr>
+              <th>PLU Code</th>
+              <th>Description</th>
+              <th>Price ($)</th>
+              <th></th>
+            </tr>
+            
+            {% for product in products %}
+            <tr>
+              <td class="resulttd">
+                <input
+                  type="text"
+                  name="PLU"
+                  value="{{ product.PLU }} "
+                  readonly
+                />
+              </td>
+              <td class="resulttd">
+                <input
+                  id="resultdesc"
+                  type="text"
+                  name="description"
+                  value="{{ product.description }} "
+                />
+              </td>
+              <td class="resulttd">
+                <input
+                  id="resultprice"
+                  type="number"
+                  name="price"
+                  value="{{ product.price }}"
+                  step="0.1"
+                />
+              </td>
+              <td>
+                <button class="productEditDel" type="submit" name="Btn" value="edit"> Edit</button>
+                <button class="productEditDel" type="submit" name="Btn" value="delete"> Delete</button>
+              </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+          </table>
         </div>
       </div>
     </div>

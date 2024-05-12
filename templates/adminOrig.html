@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>s2008156 Cloud Computing A3 2024 SP1</title>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}" 
+    />
+  </head>
+  <body>
+    <div id="adminContainer">
+      <nav>
+        <div id="banner">
+           <img src="{{ navBanner }}" /> 
+        </div>
+        <div class="navbar">
+          <div class="dropdown">
+            <button class="dropbtn">Admin ▼</button>
+            <div class="dropdown-content">
+              <a href="{{ url_for('admin') }}">Staff Management</a>
+              {% if staffLevel == "1" %}
+              <a href="#stock">Stock</a>
+              <a href="#records">Records</a>
+              {% endif %}
+            </div>
+          </div>
+
+          <a href="{{ url_for('main') }}">Return to Sales Screen</a>
+        </div>
+      </nav>
+      <div class="headerBanner">
+        <h1>ADMIN CONSOLE</h1>
+      </div>
+      <div id="addEditContainer">
+        {% if staffLevel == "2" %}
+        <div id="newUser">
+          <form
+            action="{{ url_for('adminProcess') }}"
+            class="addUserForm"
+            method="post"
+          >
+            <div class="formGroup">
+              <h2>EDIT MY PROFILE</h2>
+            </div>
+            <div class="formGroup">
+              <input
+                type="email"
+                name="editUserEmail"
+                value="{{ loggedUser.email }}"
+                readonly
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="text"
+                name="editUserName"
+                value="{{ loggedUser.user_name }}"
+                required
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="password"
+                name="editUserPassword"
+                value=""
+                placeholder="Password"
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="password"
+                name="editUserPasswordConfirm"
+                value=""
+                placeholder="Confirm Password"
+              /><br />
+            </div>
+            <div class="formGroup">
+              <!-- <select
+                class="formGroup"
+                id="dropdown"
+                name="editUserLvl"
+                required
+              >
+                {% if loggedUser.staff_level == "1" or loggedUser.staff_level ==
+                1 %}
+                <option value="1">Admin</option>
+                <option value="2">Staff</option>
+                {% else %}
+                <option value="2">Staff</option>
+                <option value="2"></option>
+                {% endif %}
+              </select> -->
+            </div>
+            <div class="formGroup">
+              <Button type="submit" class="btnPrimary" name="action" value="Edit"> Confirm Edit </Button>
+            </div>
+            <div class="formGroup">
+              {% if error %}
+              <h3 style="color: red">{{ error }}</h3>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+        {% elif staffLevel == "1" %}
+        <div id="newUser">
+          <form
+            action="{{ url_for('addUser') }}"
+            class="addUserForm"
+            method="post"
+          >
+            <div class="formGroup">
+              <h2>NEW USER</h2>
+            </div>
+            <div class="formGroup">
+              <input
+                type="email"
+                name="addUserEmail"
+                value=""
+                placeholder="Email"
+                required
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="text"
+                name="addUserName"
+                value=""
+                placeholder="Full Name"
+                required
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="password"
+                name="addUserPassword"
+                value=""
+                placeholder="Password"
+                required
+              /><br />
+            </div>
+            <div class="formGroup">
+              <input
+                type="password"
+                name="addUserPasswordConfirm"
+                value=""
+                placeholder="Confirm Password"
+                required
+              /><br />
+            </div>
+            <div class="formGroup">
+              <select
+                class="formGroup"
+                id="dropdown"
+                name="addUserStaffLvl"
+                required
+              >
+                <option value="" disabled selected hidden>
+                  Staff Access Level
+                </option>
+                <option value="2">Staff</option>
+                <option value="1">Admin</option>
+              </select>
+            </div>
+            <div class="formGroup">
+              <input type="submit" class="btnPrimary" value="Add User" />
+            </div>
+            <div class="formGroup">
+              {% if error %}
+              <h3 style="color: red">{{ error }}</h3>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+        <div id="usersList">
+          <div class="formGroup">
+            <h2>CURRENT STAFF</h2>
+          </div>
+          <table id="usersTable">
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Level</th>
+              <th></th>
+              <th></th>
+            </tr>
+            {% for user in users %}
+            <tr>
+              <form action="{{ url_for('adminProcess') }}" method="POST">
+                <td>
+                  <input
+                    class="usersTableInput"
+                    type="email"
+                    name="editUserEmail"
+                    value="{{ user.email }}"
+                    readonly
+                  />
+                </td>
+                <td>
+                  <input
+                    class="usersTableInputName"
+                    type="text"
+                    name="editUserName"
+                    value="{{ user.name }}"
+                  />
+                </td>
+                <td>
+                  <select id="dropdown" name="editUserLvl" required>
+                    {% if user.staffLevel == "1" or user.staffLevel == 1 %}
+                    <option value="1">Admin</option>
+                    <option value="2">Staff</option>
+                    {% else %}
+                    <option value="2">Staff</option>
+                    <option value="1">Admin</option>
+                    {% endif %}
+                  </select>
+                </td>
+                <td>
+                  <button
+                    class="usersTableBtnEdit"
+                    type="submit"
+                    name="action"
+                    value="edit"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td>
+                  <button
+                    class="usersTableBtnDel"
+                    type="submit"
+                    name="action"
+                    value="delete"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </form>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
