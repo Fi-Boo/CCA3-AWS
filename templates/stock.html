@@ -36,6 +36,32 @@
       <div class="headerBanner">
         <h1>STOCK CONSOLE</h1>
       </div>
+
+      <div class="formGroup">
+        <h2>IMPORT/EXPORT data</h2>
+      </div>
+      <div class="importExportContainer">
+        <form
+          class="dataForm"
+          action="{{url_for('fileProcess')}}"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <input
+            type="file"
+            name="importFile"
+            accept="text/csv"
+          />
+          <button type="submit" name="dataBtn" value="import">Import</button>
+          <input
+            type="file"
+            name="exportFile"
+            accept="text/csv"
+          />
+          <button type="submit" name="dataBtn" value="export">Export</button>
+        </form>
+      </div>
+
       <div class="addEditContainer">
         <form
           class="stockForm"
@@ -169,17 +195,16 @@
                 name="stockSKUImage"
               />
             </div>
-
+            <div class="addError">
+              {% if message %}
+              <p style="color: red">{{ message }}</p>
+              {% endif %}
+            </div>
             <div class="stockAddBtn">
               <button type="submit">ADD PRODUCT</button>
             </div>
           </div>
         </form>
-        <div class="formGroup">
-          {% if message %}
-          <p style="color: red">{{ message }}</p>
-          {% endif %}
-        </div>
         <div class="formGroup">
           <h2>SEARCH STOCK</h2>
         </div>
@@ -250,7 +275,7 @@
               <th>Price ($)</th>
               <th></th>
             </tr>
-            
+
             {% for product in products %}
             <tr>
               <td class="resulttd">
@@ -279,12 +304,25 @@
                 />
               </td>
               <td>
-                <button class="productEditDel" type="submit" name="Btn" value="edit"> Edit</button>
-                <button class="productEditDel" type="submit" name="Btn" value="delete"> Delete</button>
+                <button
+                  class="productEditDel"
+                  type="submit"
+                  name="Btn"
+                  value="edit"
+                >
+                  Edit
+                </button>
+                <button
+                  class="productEditDel"
+                  type="submit"
+                  name="Btn"
+                  value="delete"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
-            {% endfor %}
-            {% endif %}
+            {% endfor %} {% endif %}
           </table>
         </div>
       </div>

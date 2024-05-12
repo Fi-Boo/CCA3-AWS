@@ -136,23 +136,27 @@ def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockM
         'PLU': stockPLUSingle,
         'description': stockDesc,
         'price': stockPriceSingle,
+        'qty' : "1",
         'SKU': SKU,
     }
+    
     addEditProduct(item)
     
     if stockPLUMulti != "":
         item = {
             'PLU': stockPLUMulti,
-            'description': stockDesc + " (" + stockMultiValue + "PK)",
+            'description': stockDesc,
             'price': stockPriceMulti,
+            'qty' : stockMultiValue,
             'SKU': SKU,
         }
         addEditProduct(item)
         
     item = {
         'PLU': stockPLUCase,
-        'description': stockDesc + " (CASE)",
+        'description': stockDesc,
         'price': stockPriceCase,
+        'qty': "24",
         'SKU': SKU,
     }
     addEditProduct(item)
