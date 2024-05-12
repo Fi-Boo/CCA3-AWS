@@ -473,7 +473,7 @@ input {
 .searchContainer2 {
 
   border-radius: 5px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   height: 20rem;
   width: 62%;
