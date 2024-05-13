@@ -451,7 +451,7 @@ input {
 }
 
 .searchTable {
-  width: 48rem;
+  width: 55rem;
   margin: 0 auto;
 }
 
@@ -470,8 +470,12 @@ input {
   text-align: left;
 }
 
-#resultprice {
+#resultprice, #resultqty {
   width: 5rem;
+}
+
+#resultprice {
+  text-align: right;
 }
 
 .searchContainer2 {
@@ -480,7 +484,7 @@ input {
   overflow-y: auto;
   overflow-x: hidden;
   height: 20rem;
-  width: 62%;
+  width: 70%;
   margin: 0 auto;
   padding: 0;
 
@@ -491,6 +495,6 @@ input {
   border: 1px solid black;
   border-radius: 5px;
   margin: 0 auto;
-  height: 5rem;
+  height: 4rem;
   padding: 1rem;
 }

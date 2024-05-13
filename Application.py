@@ -1,11 +1,12 @@
+import csv
 from decimal import Decimal
+import io
 import random
 import string
 import boto3
 
 from flask import Flask, request, render_template, redirect, url_for, session
 from boto3.dynamodb.conditions import Key, Attr
-from retailPOS import User, Product
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
 awsKey = 'AKIAW3MEABS7NBPKBZEW'
@@ -133,7 +134,7 @@ def generateSKU(stockSKUClass):
 def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockMultiValue, stockPriceMulti, stockPLUCase, stockPriceCase, SKU):
     
     item = {
-        'PLU': stockPLUSingle,
+        'PLU': stockPLUSingle.upper(),
         'description': stockDesc,
         'price': stockPriceSingle,
         'qty' : "1",
@@ -144,7 +145,7 @@ def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockM
     
     if stockPLUMulti != "":
         item = {
-            'PLU': stockPLUMulti,
+            'PLU': stockPLUMulti.upper(),
             'description': stockDesc,
             'price': stockPriceMulti,
             'qty' : stockMultiValue,
@@ -153,7 +154,7 @@ def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockM
         addEditProduct(item)
         
     item = {
-        'PLU': stockPLUCase,
+        'PLU': stockPLUCase.upper(),
         'description': stockDesc,
         'price': stockPriceCase,
         'qty': "24",
@@ -173,51 +174,99 @@ def getProducts():
             'PLU': item['PLU'],
             'SKU': item['SKU'],
             'description': item['description'],
+            'qty' : item['qty'],
             'price': item['price']
         }  
         products.append(product)
     return products
     
 def searchByCode(code):
+    
+    codeUpper = code.upper()
     response = productsTable.get_item(
         Key={
-            'PLU': code
+            'PLU': codeUpper
         }
     ) 
     products = []
-    item = response['Item']
-    product = {
-        'PLU': item['PLU'],
-        'description': item['description'],
-        'price': item['price'],
-        'SKU': item['SKU'],
-    }
-    products.append(product)
-    return products
-
-
-def searchByDesc(description):
-    
-    if description != "":
-        response = productsTable.scan(
-            FilterExpression='contains(description, :search)',
-            ExpressionAttributeValues={':search': description}
-        )
-    else:
-        response = productsTable.scan()
-        
-    products = []
-    for item in response['Items']:
+    if 'Item' in response:
+        item = response['Item']
         product = {
             'PLU': item['PLU'],
             'description': item['description'],
             'price': item['price'],
-            'SKU': item['SKU'],
+            'qty': item['qty'],
+            'SKU': item['SKU']
         }
         products.append(product)
     return products
+
+
+def searchByDesc(description):
+
+    products = []
+    response = productsTable.scan()
+    
+    if description != "":
+    
+        for item in response['Items']:
+        
+            itemDescription = item['description'].lower()
+            
+            if description.lower() in itemDescription:
+                product = {
+                    'PLU': item['PLU'],
+                    'description': item['description'],
+                    'price': item['price'],
+                    'SKU': item['SKU'],
+                    'qty': item['qty']
+                }
+                products.append(product)
+
+    else:
+        
+        for item in response['Items']:
+            product = {
+                'PLU': item['PLU'],
+                'description': item['description'],
+                'price': item['price'],
+                'SKU': item['SKU'],
+                'qty': item['qty']
+            }
+            products.append(product)
+            
+    return products
+
+def deletePLU(PLU):
+
+    key = {'PLU': PLU}
+    
+    response = productsTable.delete_item(Key=key)
+
+def updatePLU(PLU, description, qty, price):
+
+    response = productsTable.get_item(
+        Key={
+            'PLU': PLU
+        }
+    ) 
+
+    item = response['Item']
+    product = {
+        'PLU': item['PLU'],
+        'SKU': item['SKU'],
+        'description': description,
+        'qty': qty,
+        'price': price
+    }
+    
+    productsTable.put_item(Item=product)   
+    
         
 application = Flask(__name__)
+
+application.jinja_env.globals['float'] = float
+application.jinja_env.globals['round'] = round
 
 #https://www.javatpoint.com/python-program-to-generate-a-random-string#:~:text=ADVERTISEMENT-,The%20random.,choices()%20function.
 application.secret_key = "".join(random.choices(string.ascii_uppercase + string.digits, k = 10))
@@ -368,11 +417,19 @@ def stock():
     if 'loggedUser' in session:
         
         message = None
+        dataError = None
+        resultMsg = None
         
         if 'm' in request.args: 
             message = request.args.get('m')
+            
+        if 'dataError' in request.args: 
+            dataError = request.args.get('dataError')
+            
+        if 'resultMsg' in request.args: 
+            resultMsg = request.args.get('resultMsg')
         
-        return render_template("stock.html", navBanner = navBanner, message = message)
+        return render_template("stock.html", navBanner = navBanner, message = message, dataError = dataError, resultMsg = resultMsg)
 
     return redirect(url_for('login'))
 
@@ -428,7 +485,7 @@ def searchProduct():
     if 'loggedUser' in session:
         
         if request.method == 'POST':
-            m=None
+            resultMsg=None
             products = []
             searchSelection = request.form['searchPLUSKU']
             description = request.form['searchDesc']
@@ -440,15 +497,102 @@ def searchProduct():
                 return redirect(url_for('stock', m=m))
 
             if searchType == 'searchCode':
-                products = searchByCode(code)
+                
+                if code != "":
+                    products = searchByCode(code)
+                else:
+                    resultMsg = "must input code to use code search"
+                    return redirect(url_for('stock', resultMsg = resultMsg))
 
-            else:
-                products = searchByDesc(description)
+            elif searchType == 'searchDesc':
+                
+                products = searchByDesc(description.lower())
             
-            return render_template("stock.html", navBanner = navBanner, products = products )
+            if len(products) == 0:
+                resultMsg = "No match found"
+                print("no match")
+            
+            return render_template("stock.html", navBanner = navBanner, products = products, resultMsg = resultMsg )
     
     return redirect(url_for('login'))
 
+@application.route('/fileProcess', methods=['GET', 'POST'])
+def fileProcess():
+    
+    if 'loggedUser' in session:
+        
+        if request.method == 'POST':
+            
+            dataError = None
+            
+            processType = request.form['dataBtn']
+            
+            if processType == 'import':
+                
+                try:
+                
+                    file = request.files['importFile']
+                    
+                    if file.filename == '':
+                        dataError = 'No File selected'
+                        return redirect(url_for('stock', dataError = dataError))
+        
+                    if file:
+                        
+                        fileData = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                        csv_reader = csv.DictReader(fileData, delimiter='\t')
+                        items = []
+                        for row in csv_reader:
+                            items.append(row)
+                        
+                        for item in items:
+                            productsTable.put_item(Item=item)
+                        
+                        dataError = "Data imported successfully"
+                    else:
+                        dataError = "Error with data import"
+                        
+                    return redirect(url_for('stock', dataError = dataError))
+                
+                except Exception as e:
+                    return str(e)
+
+    return redirect(url_for('login'))
+
+@application.route('/editStock', methods=['GET','POST'])
+def editStock():
+    
+    if 'loggedUser' in session:
+        
+        if request.method == 'POST':
+            
+            resultMsg = None
+            PLU = request.form['PLU']
+            description = request.form['description']
+            qty = request.form['qty']
+            price = request.form['price']
+            action = request.form['Btn']
+            
+            if action == "delete":
+                
+                deletePLU(PLU)
+                resultMsg = "Product deleted successfully"
+            
+            elif action == "edit":
+                
+                updatePLU(PLU, description, qty, price)
+                resultMsg = "Product edited successfully"
+                
+            
+            return redirect(url_for('stock', resultMsg = resultMsg))  
+
+    return redirect(url_for('login'))
+
+
+@application.route('/success')
+def success():
+    return "success"
+    
 
 if __name__ == "__main__":
     #application.debug = True
