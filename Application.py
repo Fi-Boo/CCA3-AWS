@@ -559,6 +559,7 @@ def fileProcess():
 
     return redirect(url_for('login'))
 
+
 @application.route('/editStock', methods=['GET','POST'])
 def editStock():
     
@@ -588,6 +589,24 @@ def editStock():
 
     return redirect(url_for('login'))
 
+
+@application.route('/saleSearchPLU', methods=['GET','POST'])
+def saleSearchPLU():
+    
+    if 'loggedUser' in session:
+        
+        if request.method == 'POST':
+            
+            m = None
+            PLU = request.form['PLUsearch']
+            
+            if PLU != '':
+                results = searchByCode(PLU)
+                
+            
+            return render_template('main.html', results = results, noStock = m)
+    
+    return redirect(url_for('login'))
 
 @application.route('/success')
 def success():

@@ -37,10 +37,9 @@
       </div>
       <div id="mainContent">
         <div id="searchByPLU">
-          <form action="" method="post">
+          <form action="{{ url_for('saleSearchPLU') }}" method="post">
             <label for="PLU">PLU/Barcode:</label>
             <input type="text" id="PLUsearch" name="PLUsearch" />
-            <button type="submit">Add Item</button>
           </form>
         </div>
         <div id="searchByName">
