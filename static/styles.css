@@ -584,7 +584,6 @@ input {
 #mainTable tr th:last-child, #mainTable tr td:last-child,
 #mainTable tr th:nth-child(5), #mainTable tr td:nth-child(5) {
   width: 4rem;
-  border: 1px solid green;
   padding: 0;
 }
 

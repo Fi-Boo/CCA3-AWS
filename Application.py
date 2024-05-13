@@ -615,14 +615,17 @@ def viewCart():
                 else:
                     m="No product found"
 
-        return render_template('main.html', cart = cart, error = m)
+        return render_template('main.html', navBanner = navBanner, cart = cart, error = m)
     
     return redirect(url_for('login'))
 
 
-@application.route('/removeProduct')
-def removeFromCart():
-    return "success"
+@application.route('/logout')
+def logout():
+    
+    session.clear()
+    cart.clear()
+    return redirect(url_for('login'))
     
 
 if __name__ == "__main__":
