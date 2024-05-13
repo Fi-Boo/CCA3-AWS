@@ -527,3 +527,79 @@ input {
 .searchTable th:nth-child(3), .searchTable th:nth-child(4) {
   width: 5rem;
 }
+
+.mainSection {
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-areas:
+    '. . . transaction .'
+    '. plu plu . .'
+    '. desc desc desc .'
+    '. error error error .';
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-row-gap: 0.5rem;
+  background: #cdcdcd;
+}
+
+#transactionNum {
+  grid-area: transaction;
+  text-align: right;
+  background: white;
+  border-radius: 5px;
+  margin: 0.25rem;
+  align-content: center;
+}
+
+#searchByPLU {
+  grid-area: plu;
+  margin-left: 2px;
+}
+
+#searchByName {
+  grid-area: desc;
+}
+
+#errorBanner {
+  grid-area: error;
+}
+
+#transactionNum, #searchByPLU, #searchByName, #errorBanner {
+  height: 2rem;
+}
+
+#PLUsearch, #nameSearch {
+  height: 2rem;
+  width: 17rem;
+  margin: 0;
+  padding: 0;
+}
+
+#mainTable {
+  width: 70%;
+  margin: 0 auto;
+}
+
+#mainTable tr th:first-child, #mainTable tr td:first-child,
+#mainTable tr th:last-child, #mainTable tr td:last-child,
+#mainTable tr th:nth-child(5), #mainTable tr td:nth-child(5) {
+  width: 4rem;
+  border: 1px solid green;
+  padding: 0;
+}
+
+#mainTable tr th:nth-child(3), #mainTable tr td:nth-child(3) {
+  width: 20rem;
+}
+
+#mainTable tr td:nth-child(5) input {
+  width:100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+#mainTable tr th:nth-child(4), #mainTable tr td:nth-child(4),
+#mainTable tr th:nth-child(6), #mainTable tr td:nth-child(6) {
+  width: 6rem;
+}

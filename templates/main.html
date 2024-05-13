@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>s2008156 Cloud Computing A3 2024 SP1</title>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <link
+    <!--<link
       type="text/css"
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}" 
+    />-->
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="../static/styles.css " 
     />
   </head>
   <body>
@@ -36,29 +41,31 @@
         <h1>Salesperson: {{ loggedUser }}</h1>
       </div>
       <div id="mainContent">
-        <div id="searchByPLU">
-          <form action="{{ url_for('saleSearchPLU') }}" method="post">
-            <label for="PLU">PLU/Barcode:</label>
-            <input type="text" id="PLUsearch" name="PLUsearch" />
-          </form>
-        </div>
-        <div id="searchByName">
-          <form action="" method="post">
-            <label for="PLU">Name Search:</label>
-            <input type="text" id="nameSearch" name="nameSearch" />
-            <button type="submit">Search</button>
-          </form>
-        </div>
-        <div id="transactionNum">
-          <h3>{{ transaction }}</h3>
-        </div>
-        <div id="errorBanner">
-          {% if error %}
-          <h3>{{ error }}</h3>
-          {% endif %}
+        <div class="mainSection">
+          <div id="searchByPLU">
+            <form action="{{ url_for('viewCart') }}" method="POST">
+              <label for="PLUsearch">PLU/Barcode:</label>
+              <input type="text" id="PLUsearch" name="PLUsearch" placeholder="Barcode Search"/>
+            </form>
+          </div>
+          <div id="searchByName">
+            <form action="" method="post">
+              <label for="nameSearch">Name Search:</label>
+              <input type="text" id="nameSearch" name="nameSearch" placeholder="Partial Name Search"/>
+              <button type="submit">Search</button>
+            </form>
+          </div>
+          <div id="transactionNum">
+            <h3>Transaction: {{ transaction }}</h3>
+          </div>
+          <div id="errorBanner">
+            {% if error %}
+            <h3>{{ error }}</h3>
+            {% endif %}
+          </div>
         </div>
         <div id="cartContent">
-          <table>
+          <table id="mainTable">
             <tr>
               <th>L:</th>
               <th>Code</th>
@@ -69,23 +76,16 @@
               <th></th>
             </tr>
             {% for item in cart %}
+            <form action="{{ url_for('removeFromCart') }}" method="POST">
             <tr>
-              <td>{{ item.code }}</td>
-              <td>{{ item.description }}</td>
-              <td>{{ item.price }}</td>
-              <td>
-                <input type="number" id="lineQty" name="lineQty" value="1" />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  id="lineTotal"
-                  name="lineTotal"
-                  value=""
-                  readonly
-                />
-              </td>
-              <td><input type="hidden" value="{{ item.code }}" /></td>
+              
+              <td>{{ loop.index }}</td>
+              <td>{{ item.item.PLU }}</td>
+              <td>{{ item.item.description }}</td>
+              <td>{{ item.item.price }}</td>
+              <td><input type="number" id="lineQty" name="lineQty" value="{{ item.qty }}" step="1"/></td>
+              <td></td>
+              <td><Button type="submit">Delete</button>
             </tr>
 
             {% endfor %}

@@ -18,6 +18,7 @@ s3 = boto3.client('s3', aws_access_key_id=awsKey, aws_secret_access_key=awsSecre
 cloudFrontDomain ='https://d1yd7dukro94c1.cloudfront.net/'
 navBanner = cloudFrontDomain + "navBanner.png"
 products = []
+cart = []
 loginTable = dynamodb.Table("cca3-login")
 productsTable = dynamodb.Table("cca3-products")
 
@@ -146,7 +147,7 @@ def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockM
     if stockPLUMulti != "":
         item = {
             'PLU': stockPLUMulti.upper(),
-            'description': stockDesc,
+            'description': stockDesc + " multipack",
             'price': stockPriceMulti,
             'qty' : stockMultiValue,
             'SKU': SKU,
@@ -155,7 +156,7 @@ def addNewSKU(stockDesc, stockPLUSingle, stockPriceSingle, stockPLUMulti, stockM
         
     item = {
         'PLU': stockPLUCase.upper(),
-        'description': stockDesc,
+        'description': stockDesc + " CASE",
         'price': stockPriceCase,
         'qty': "24",
         'SKU': SKU,
@@ -590,26 +591,37 @@ def editStock():
     return redirect(url_for('login'))
 
 
-@application.route('/saleSearchPLU', methods=['GET','POST'])
-def saleSearchPLU():
+@application.route('/cart', methods=['GET','POST'])
+def viewCart():
     
     if 'loggedUser' in session:
         
+        m = None
+        
         if request.method == 'POST':
             
-            m = None
             PLU = request.form['PLUsearch']
             
             if PLU != '':
                 results = searchByCode(PLU)
                 
-            
-            return render_template('main.html', results = results, noStock = m)
+                if results:
+                    for result in results:
+                        cartItem = {
+                            "item": result,
+                            "qty": "1"
+                        }
+                        cart.append(cartItem)
+                else:
+                    m="No product found"
+
+        return render_template('main.html', cart = cart, error = m)
     
     return redirect(url_for('login'))
 
-@application.route('/success')
-def success():
+
+@application.route('/removeProduct')
+def removeFromCart():
     return "success"
     
 
