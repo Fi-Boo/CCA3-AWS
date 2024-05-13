@@ -280,8 +280,9 @@
             {% for product in products %}
 
             
-              <form action="{{ url_for('editStock') }}" method="POST">
+              <form class="searchResultForm" action="{{ url_for('editStock') }}" method="POST">
                 <input
+                  id="resultCode"
                   type="text"
                   name="PLU"
                   value="{{ product.PLU }}"

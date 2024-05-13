@@ -453,6 +453,7 @@ input {
 .searchTable {
   width: 55rem;
   margin: 0 auto;
+  padding-right: 0.5rem;
 }
 
 .resulttd input {
@@ -461,13 +462,17 @@ input {
   text-align: center;
 }
 
-.resulttd {
-  overflow: hidden;
+.resultCode {
+  text-align: center;
 }
 
 #resultdesc {
   width: 20rem;
   text-align: left;
+}
+
+#resultqty {
+  text-align: center;
 }
 
 #resultprice, #resultqty {
@@ -497,4 +502,28 @@ input {
   margin: 0 auto;
   height: 4rem;
   padding: 1rem;
+}
+
+.productEditDel {
+  width: 5rem;
+}
+
+.searchResultForm input {
+  height: 1.5rem;
+}
+
+.searchTable th {
+  padding: 0 0.15rem;
+}
+
+.searchTable th:first-child {
+  width: 12rem;
+}
+
+.searchTable th:nth-child(2) {
+  width: 20rem;
+}
+
+.searchTable th:nth-child(3), .searchTable th:nth-child(4) {
+  width: 5rem;
 }
