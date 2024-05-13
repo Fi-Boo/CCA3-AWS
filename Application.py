@@ -608,10 +608,13 @@ def viewCart():
                 if results:
                     for result in results:
                         cartItem = {
-                            "item": result,
+                            "product": result,
                             "qty": "1"
                         }
                         cart.append(cartItem)
+                        
+                        
+                        print(cart)
                 else:
                     m="No product found"
 
@@ -619,6 +622,31 @@ def viewCart():
     
     return redirect(url_for('login'))
 
+
+@application.route('/removeCartItem', methods=['GET', 'POST'])
+def removeCartItem():
+    
+    if 'loggedUser' in session:
+        
+        m = None
+        
+        if request.method == 'POST':
+            
+            PLU = request.form['PLU']
+            
+            
+            print(type(PLU))
+            
+            
+            for i in range(len(cart)):
+                if cart[i]['product']['PLU'] == PLU:
+                    del cart[i]
+                    break
+            
+            return render_template('main.html', navBanner = navBanner, cart = cart, error = m)
+    
+    return redirect(url_for('login'))
+    
 
 @application.route('/logout')
 def logout():

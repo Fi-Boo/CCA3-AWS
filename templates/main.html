@@ -76,13 +76,14 @@
               <th></th>
             </tr>
             {% for item in cart %}
-            <form action="" method="POST">
+            <form action="{{url_for('removeCartItem')}}" method="POST">
+            <input type="hidden" name="PLU" value="{{ item.product.PLU }}">
             <tr>
               
               <td>{{ loop.index }}</td>
-              <td>{{ item.item.PLU }}</td>
-              <td>{{ item.item.description }}</td>
-              <td>{{ item.item.price }}</td>
+              <td>{{ item.product.PLU }}</td>
+              <td>{{ item.product.description }}</td>
+              <td>{{ item.product.price }}</td>
               <td><input type="number" id="lineQty" name="lineQty" value="{{ item.qty }}" step="1"/></td>
               <td></td>
               <td><Button type="submit">Delete</button>
