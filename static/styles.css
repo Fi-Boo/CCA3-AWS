@@ -602,3 +602,33 @@ input {
 #mainTable tr th:nth-child(6), #mainTable tr td:nth-child(6) {
   width: 6rem;
 }
+
+#totalsBanner {
+  width: 70%;
+  margin: 0.25rem auto;
+  position: sticky;
+  bottom: 0;
+  text-align: right;
+  font-size: 3rem;
+  height: 4rem;
+  
+}
+
+#cartTotal {
+  width: 15rem;
+  height: 4rem;
+  font-size: 3rem;
+  padding-left: 1rem;
+}
+
+#totalBtn {
+  height: 100%;
+  padding: 0;
+  align-self: top;
+  margin: 0;
+  font-size: 3rem;
+}
+
+#rowImg, #rowImg img {
+  height: 3rem;
+}

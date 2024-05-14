@@ -1,12 +1,12 @@
-import csv
 from decimal import Decimal
 import io
 import random
 import string
 import boto3
 
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 from boto3.dynamodb.conditions import Key, Attr
+from datetime import datetime
 
 #shouldn't be putting credentials in code! I'll have to search for alternative method (IAM) when I have more time.
 awsKey = 'AKIAW3MEABS7NBPKBZEW'
@@ -21,6 +21,7 @@ products = []
 cart = []
 loginTable = dynamodb.Table("cca3-login")
 productsTable = dynamodb.Table("cca3-products")
+transactionTable = dynamodb.Table("cca3-transactions")
 
 def queryBy(email):
     
@@ -262,12 +263,37 @@ def updatePLU(PLU, description, qty, price):
     }
     
     productsTable.put_item(Item=product)   
+
+def getTransactionID():
+    response = transactionTable.scan()
     
+    length = len(response.get('Items', []))
+    
+    id = "T" + '{:05d}'.format(length+1)
+
+    return id
+  
+def getCartTotal():
+    
+    total = 0
+    
+    for item in cart:
+        total += float(item['linetotal'])
+        
+    return format(total, ".2f")  
+
+
+def updateTransRecord(transaction):
+    
+    transactionTable.put_item(Item=transaction)
+
+
+
+
         
 application = Flask(__name__)
 
 application.jinja_env.globals['float'] = float
-application.jinja_env.globals['round'] = round
 
 #https://www.javatpoint.com/python-program-to-generate-a-random-string#:~:text=ADVERTISEMENT-,The%20random.,choices()%20function.
 application.secret_key = "".join(random.choices(string.ascii_uppercase + string.digits, k = 10))
@@ -303,10 +329,13 @@ def main():
     if 'loggedUser' in session:
         
         products = getProducts()
+        session['transID'] = getTransactionID()
         
         loggedUsername = getUsername(session['loggedUser'])
         
-        return render_template('main.html', navBanner = navBanner, loggedUser = loggedUsername, staffLevel = session['staffLevel'])
+        cartTotal = getCartTotal()
+        
+        return render_template('main.html', navBanner = navBanner, cartTotal = cartTotal, cart = cart, loggedUser = loggedUsername)
     
     else:
         return redirect(url_for('login'))
@@ -322,7 +351,7 @@ def admin():
         
         loggedUser = getLoggedUser(session['loggedUser'])
         
-        return render_template('admin.html', navBanner = navBanner, staffLevel = session['staffLevel'], loggedUser = loggedUser, users = users, error = error)
+        return render_template('admin.html', navBanner = navBanner, loggedUser = loggedUser, users = users, error = error)
     
     else:
         return redirect(url_for('login'))
@@ -609,16 +638,15 @@ def viewCart():
                     for result in results:
                         cartItem = {
                             "product": result,
-                            "qty": "1"
+                            "qty": 1,
+                            "linetotal" : format(float(result['price']), ".2f")
                         }
                         cart.append(cartItem)
                         
-                        
-                        print(cart)
                 else:
                     m="No product found"
 
-        return render_template('main.html', navBanner = navBanner, cart = cart, error = m)
+        return render_template('main.html', navBanner = navBanner, cartTotal = getCartTotal(), cart = cart, error = m)
     
     return redirect(url_for('login'))
 
@@ -632,21 +660,66 @@ def removeCartItem():
         
         if request.method == 'POST':
             
-            PLU = request.form['PLU']
+            index = int(request.form['index'])-1 
             
+            del cart[index]
             
-            print(type(PLU))
-            
-            
-            for i in range(len(cart)):
-                if cart[i]['product']['PLU'] == PLU:
-                    del cart[i]
-                    break
-            
-            return render_template('main.html', navBanner = navBanner, cart = cart, error = m)
+            return render_template('main.html', navBanner = navBanner, cartTotal = getCartTotal(), cart = cart, error = m)
     
     return redirect(url_for('login'))
     
+@application.route('/updateCart', methods=['POST'])
+def updateCart():
+    
+    if 'loggedUser' in session:
+        
+        m=None
+        index = int(request.form['productLine'])-1
+        newQty = int(request.form['qty'])
+        
+        linetotal = newQty * float(cart[index]['product']['price'])
+        
+        cart[index]['qty'] = newQty
+        cart[index]['linetotal'] = format(linetotal, ".2f")
+        
+        updatedCartTotal = format(sum(float(item['linetotal']) for item in cart), ".2f")
+
+        return jsonify({'updatedLineTotal': cart[index]['linetotal'], 'updatedCartTotal': updatedCartTotal})
+    
+    return redirect(url_for('login'))
+
+
+@application.route('/checkout', methods=['POST'])
+def checkout():
+
+    if 'loggedUser' in session:
+        
+        transactionID = session['transID']
+        cartTotal = request.form['cartTotal']
+        
+        if float(cartTotal) == 0:
+            
+            return redirect(url_for('main'))
+        
+        timestamp = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        
+        transaction = {
+            'id': transactionID,
+            'cart': cart,
+            'total': cartTotal,
+            'staff': session['loggedUser'],
+            'date_time': timestamp
+        }
+        
+        updateTransRecord(transaction)
+        cart.clear()
+        session['transID'] = getTransactionID()
+        
+        return redirect(url_for('main'))
+        
+    return redirect(url_for('login'))
+  
+
 
 @application.route('/logout')
 def logout():

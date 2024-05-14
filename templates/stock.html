@@ -22,7 +22,7 @@
             <button class="dropbtn">Admin ▼</button>
             <div class="dropdown-content">
               <a href="{{ url_for('admin') }}">Staff Management</a>
-              {% if staffLevel == "1" %}
+              {% if session['staffLevel'] == "1" %}
               <a href="{{ url_for('stock') }}">Stock</a>
               <a href="#records">Records</a>
               {% endif %}

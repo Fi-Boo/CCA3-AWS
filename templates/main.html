@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>s2008156 Cloud Computing A3 2024 SP1</title>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <!--<link
-      type="text/css"
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}" 
-    />-->
     <link
       type="text/css"
       rel="stylesheet"
-      href="../static/styles.css " 
+      href="{{ url_for('static', filename='styles.css') }}" 
     />
   </head>
   <body>
@@ -27,13 +22,13 @@
             <button class="dropbtn">Admin ▼</button>
             <div class="dropdown-content">
               <a href="{{ url_for('admin') }}">Staff Management</a>
-              {% if staffLevel == "1" %}
+              {% if session['staffLevel'] == "1" %}
               <a href="{{ url_for('stock') }}">Stock</a>
               <a href="#records">Records</a>
               {% endif %}
             </div>
           </div>
-          
+
           <a href="{{ url_for('logout') }}">Logout</a>
         </div>
       </nav>
@@ -45,18 +40,28 @@
           <div id="searchByPLU">
             <form action="{{ url_for('viewCart') }}" method="POST">
               <label for="PLUsearch">PLU/Barcode:</label>
-              <input type="text" id="PLUsearch" name="PLUsearch" placeholder="Barcode Search"/>
+              <input
+                type="text"
+                id="PLUsearch"
+                name="PLUsearch"
+                placeholder="Barcode Search"
+              />
             </form>
           </div>
           <div id="searchByName">
             <form action="" method="post">
               <label for="nameSearch">Name Search:</label>
-              <input type="text" id="nameSearch" name="nameSearch" placeholder="Partial Name Search"/>
+              <input
+                type="text"
+                id="nameSearch"
+                name="nameSearch"
+                placeholder="Partial Name Search"
+              />
               <button type="submit">Search</button>
             </form>
           </div>
           <div id="transactionNum">
-            <h3>Transaction: {{ transaction }}</h3>
+            <h3>Transaction: {{ session['transID'] }}</h3>
           </div>
           <div id="errorBanner">
             {% if error %}
@@ -67,7 +72,7 @@
         <div id="cartContent">
           <table id="mainTable">
             <tr>
-              <th>L:</th>
+              <th></th>
               <th>Code</th>
               <th>Description</th>
               <th>Price</th>
@@ -77,22 +82,44 @@
             </tr>
             {% for item in cart %}
             <form action="{{url_for('removeCartItem')}}" method="POST">
-            <input type="hidden" name="PLU" value="{{ item.product.PLU }}">
-            <tr>
-              
-              <td>{{ loop.index }}</td>
-              <td>{{ item.product.PLU }}</td>
-              <td>{{ item.product.description }}</td>
-              <td>{{ item.product.price }}</td>
-              <td><input type="number" id="lineQty" name="lineQty" value="{{ item.qty }}" step="1"/></td>
-              <td></td>
-              <td><Button type="submit">Delete</button>
-            </tr>
-
+              <input type="hidden" name="index" value="{{ loop.index }}" />
+              <tr id="row{{ loop.index }}">
+                <td id="rowImg"><img src="https://d1yd7dukro94c1.cloudfront.net/{{item.product.SKU}}.png"/></td>
+                <td>{{ item.product.PLU }}</td>
+                <td>{{ item.product.description }}</td>
+                <td>{{ item.product.price }}</td>
+                <td>
+                  <input
+                    type="number"
+                    id="lineQty{{ loop.index }}"
+                    name="lineQty"
+                    value="{{ item.qty }}"
+                    step="1"
+                    productLine="{{ loop.index }}"
+                    onchange="updateQuantity(this)"
+                  />
+                </td>
+                <td id="lineTotal{{ loop.index }}">{{ item.linetotal }}</td>
+                <td><button type="submit">Delete</button></td>
+              </tr>
+            </form>
             {% endfor %}
           </table>
         </div>
-        <div id="totalsBanner"></div>
+      </div>
+      <div id="totalsBanner">
+        <form id="totalsForm" action="{{ url_for('checkout') }}" method="POST">
+          <label id="totalLabel" for="total"> TOTAL: $</label>
+          <input
+            id="cartTotal"
+            name="cartTotal"
+            value="{{ cartTotal }}"
+            readonly
+          />
+          <button id="totalBtn" type="submit" name="checkOutBtn" >
+            >>
+          </button>
+        </form>
       </div>
     </div>
   </body>
